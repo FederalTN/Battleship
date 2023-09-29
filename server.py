@@ -1,11 +1,14 @@
 import socket
+import json
 
 localIP = "127.0.0.1"
 localPort = 20001
 bufferSize = 1024
 
-msgFromServer = "Hello UDP Client"
-bytesToSend = str.encode(msgFromServer)
+msgFromServer = {
+    "response": "HELLO UDP CLIENT"
+}
+bytesToSend = json.dumps(msgFromServer).encode()
 
 # Create a datagram socket
 UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -20,7 +23,10 @@ while(True):
     message = bytesAddressPair[0]
     address = bytesAddressPair[1]
 
-    clientMsg = "Message from Client:{}".format(message)
+    # Decodifica el mensaje JSON
+    receivedJson = json.loads(message.decode())
+
+    clientMsg = "Message from Client:{}".format(receivedJson["message"])
     clientIP = "Client IP Address:{}".format(address)
 
     print(clientMsg)
