@@ -1,12 +1,17 @@
 import socket
 import json
+import BattleClasses
 
 localIP = "127.0.0.1"
 localPort = 20001
 bufferSize = 1024
+server = BattleClasses.Servidor()
 
 msgFromServer = {
-    "response": "HELLO UDP CLIENT"
+    "response": "HELLO UDP CLIENT",
+    "action": "c, a, l, b, d, s", # Accion recibida, confirmando
+    "status": "0, 1"#, # [0: False, 1: True] si la accion del cliente es correcta o no
+#   "position":  [x,y] # utlimas coordenadas jugadas x un usuario
 }
 bytesToSend = json.dumps(msgFromServer).encode()
 
@@ -15,7 +20,15 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 # Bind to address and ip
 UDPServerSocket.bind((localIP, localPort))
-print("UDP server up and listening")
+print("Esperando conexiones entrantes")
+
+# Responde del servidor
+def serverResponse(body):
+    msgFromServer = {
+        "response": body
+    }
+    bytesToSend = json.dumps(msgFromServer).encode()
+    UDPServerSocket.sendto(bytesToSend, address)
 
 # Listen for incoming datagrams
 while(True):
@@ -25,12 +38,24 @@ while(True):
 
     # Decodifica el mensaje JSON
     receivedJson = json.loads(message.decode())
+    clientMsg = receivedJson["action"]
 
-    clientMsg = "Message from Client:{}".format(receivedJson["message"])
-    clientIP = "Client IP Address:{}".format(address)
+    # Verifica si es una conexion
+    if(clientMsg == "c"):
+        # Confirmación de conexión
+        print("Conexion entrante")
+        serverResponse("conexion confirmada")
 
-    print(clientMsg)
-    print(clientIP)
+        # Conecta a un jugador
+        clientIP = "Client IP Address:{}".format(address)
+        player = BattleClasses.Jugador(clientIP)
+        server.conectarJugador(player)
 
-    # Sending a reply to client
-    UDPServerSocket.sendto(bytesToSend, address)
+        # Quienes estan conectados en el server
+        print("JUGADORES CONECTADOS:")
+        for players in server.jugadoresConectados:
+            print(players.nombre)
+    else:
+        # Comando erroneo
+        print("Denegacion de comando entrante")
+        serverResponse("Comando denegado")

@@ -1,12 +1,14 @@
 import socket
 import json
+import BattleClasses
 
 localIP = "127.0.0.1"
 localPort = 20001
 bufferSize = 1024
+client = BattleClasses.Cliente("Federal", localPort)
 
 msgFromClient = {
-    "message": "HELLO UDP SERVER"
+    "action": "c"
 }
 bytesToSend = json.dumps(msgFromClient).encode()
 

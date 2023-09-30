@@ -57,6 +57,7 @@ class Servidor:
 
     def conectarJugador(self, jugador: Jugador):
         self.jugadoresConectados.append(jugador)
+        print(("Conectado el jugador: {}".format(jugador.nombre)))
 
     def iniciarPartida(self):
         # Implementar lógica para emparejar jugadores e iniciar una partida
