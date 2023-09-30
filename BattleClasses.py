@@ -47,6 +47,7 @@ class Jugador:
     def __init__(self, nombre: str):
         self.nombre = nombre
         self.tablero = Tablero()
+        self.vidas = 6
 
     def realizarAccion(self, coordenada: Coordenada):
         return self.tablero.realizarAtaque(coordenada)

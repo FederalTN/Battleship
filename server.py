@@ -5,15 +5,8 @@ import BattleClasses
 localIP = "127.0.0.1"
 localPort = 20001
 bufferSize = 1024
-server = BattleClasses.Servidor()
 
-msgFromServer = {
-    "response": "HELLO UDP CLIENT",
-    "action": "c, a, l, b, d, s", # Accion recibida, confirmando
-    "status": "0, 1"#, # [0: False, 1: True] si la accion del cliente es correcta o no
-#   "position":  [x,y] # utlimas coordenadas jugadas x un usuario
-}
-bytesToSend = json.dumps(msgFromServer).encode()
+server = BattleClasses.Servidor()
 
 # Create a datagram socket
 UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -22,13 +15,51 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDPServerSocket.bind((localIP, localPort))
 print("Esperando conexiones entrantes")
 
-# Responde del servidor
-def serverResponse(body):
+# Confirmacion del servidor de una accion del usuario
+def serverResponse(text, body, status, position):
     msgFromServer = {
-        "response": body
+        "response": text,
+        "action": body, # Accion recibida, confirmando
+        "status": status,#, # [0: False, 1: True] si la accion del cliente es correcta o no
+        "position":  position # utlimas coordenadas jugadas x un usuario
     }
     bytesToSend = json.dumps(msgFromServer).encode()
     UDPServerSocket.sendto(bytesToSend, address)
+
+def printParticipants(server):
+    for players in server.jugadoresConectados:
+        print(players.nombre)
+    print("")
+
+def battleMatch(server):
+    matchOngoing = True
+    turnCount = 1
+    print("Turno jugador: {}".format(turnCount))
+    serverResponse("Es el turno del jugador {}!".format(turnCount), "s", 1, [])
+    while(matchOngoing):
+        # Recibir acciones de participantes
+        bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+        message = bytesAddressPair[0]
+        address = bytesAddressPair[1]
+
+        if(("Client {}: {}".format(turnCount, address)) == server.jugadoresConectados[turnCount-1].nombre):
+            # Mantiene un orden ciclico de turnos
+            if(turnCount == len(server.jugadoresConectados)):
+                turnCount = 0
+            # Decodifica el mensaje JSON
+            receivedJson = json.loads(message.decode())
+            clientMsg = receivedJson["action"]
+
+            print(clientMsg)
+
+
+            # Salta a los perdedores y informa el turno
+            turnCount += 1
+            while(server.jugadoresConectados[turnCount-1].vida == 0):
+                turnCount += 1
+            print("Turno jugador: {}".format(turnCount))
+            serverResponse("Es el turno del jugador {}!".format(turnCount), "s", 1, [])
+            
 
 # Listen for incoming datagrams
 while(True):
@@ -42,20 +73,35 @@ while(True):
 
     # Verifica si es una conexion
     if(clientMsg == "c"):
-        # Confirmación de conexión
         print("Conexion entrante")
-        serverResponse("conexion confirmada")
 
         # Conecta a un jugador
-        clientIP = "Client IP Address:{}".format(address)
-        player = BattleClasses.Jugador(clientIP)
-        server.conectarJugador(player)
+        clientIP = "Client {}: {}".format(len(server.jugadoresConectados)+1, address)
+        server.conectarJugador(BattleClasses.Jugador(clientIP))
+
+        # Confirma al jugador
+        serverResponse("Conexion correcta! Eres el jugador {}".format(len(server.jugadoresConectados)), clientMsg, 1, [])
 
         # Quienes estan conectados en el server
         print("JUGADORES CONECTADOS:")
-        for players in server.jugadoresConectados:
-            print(players.nombre)
+        printParticipants(server)
+        
+    # Verifica si se inicio la partida
+    elif (clientMsg == "s"):
+        # Confirmacion de inicio de partida
+        print("Un jugador dio la orden de empezar una partida")
+        serverResponse("Se empezo la partida!",clientMsg, 1, [])
+
+        # Quienes estan participando de la partida en el server
+        print("JUGADORES PARTICIPANTES:")
+        printParticipants(server)
+
+        # iniciar partida
+        server.iniciarPartida # aun no hace nada xd
+        # while de partida en curso
+        battleMatch(server)
+
     else:
         # Comando erroneo
         print("Denegacion de comando entrante")
-        serverResponse("Comando denegado")
+        serverResponse("Comando erroneo, intente denuevo", clientMsg, 0, [])
