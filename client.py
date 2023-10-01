@@ -7,7 +7,7 @@ localIP = "127.0.0.1"
 localPort = 20001
 bufferSize = 1024
 
-client = BattleClasses.Cliente("Federal", localPort)
+# xd client = BattleClasses.Cliente("Federal", localPort)
 
 # barcos del cliente
 fleet = {
@@ -35,6 +35,8 @@ def receiveRespond():
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
     # Decodifica el mensaje JSON
     receivedJson = json.loads(msgFromServer[0].decode())
+    msg = "Message from Server: {}".format(receivedJson["response"])
+    print(msg)
     return receivedJson
 
 # accion para la conexion
@@ -45,19 +47,19 @@ receivedJson = receiveRespond()
 connected = False
 if((receivedJson["action"],receivedJson["status"]) == ("c",1)): connected = True
 while(connected):
-    msg = "Message from Server: {}, {} {} {}".format(receivedJson["response"], receivedJson["action"], receivedJson["status"], receivedJson["position"])
-    print(msg)
 
     inputString = input("\nESPERAR MAS JUGADORES O QUIERES INICIAR LA PARTIDA?(S/n): ")
     
     if(inputString == "S" or inputString == "s"):
         sendAction("s", "", "", "")
+        receivedJson = receiveRespond()
     elif(inputString == "N" or inputString == "n"):
         print("Esperando a que inicien la partida...")
+        receivedJson = receiveRespond()
 
-    receivedJson = receiveRespond()
-    msg = "Message from Server: {}, {} {} {}".format(receivedJson["response"], receivedJson["action"], receivedJson["status"], receivedJson["position"])
-    print(msg)
+    onMatch = True
+    while(onMatch):
+        receivedJson = receiveRespond()
     
 
 

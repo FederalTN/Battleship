@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import socket
 
 class Coordenada:
     def __init__(self, x: int, y: int):
@@ -44,8 +45,9 @@ class Tablero:
         return self.casillas[coordenada.x][coordenada.y].atacarCasilla()
 
 class Jugador:
-    def __init__(self, nombre: str):
+    def __init__(self, nombre: str, address):
         self.nombre = nombre
+        self.address = address
         self.tablero = Tablero()
         self.vidas = 6
 

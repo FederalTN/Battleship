@@ -13,10 +13,10 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 # Bind to address and ip
 UDPServerSocket.bind((localIP, localPort))
-print("Esperando conexiones entrantes")
+print("Esperando conexiones entrantes\n")
 
 # Confirmacion del servidor de una accion del usuario
-def serverResponse(text, body, status, position):
+def serverResponse(address, text, body, status, position):
     msgFromServer = {
         "response": text,
         "action": body, # Accion recibida, confirmando
@@ -25,6 +25,11 @@ def serverResponse(text, body, status, position):
     }
     bytesToSend = json.dumps(msgFromServer).encode()
     UDPServerSocket.sendto(bytesToSend, address)
+
+def serverResponseGlobal(server, text, body, status, position):
+    for players in server.jugadoresConectados:
+        address = players.address
+        serverResponse(address, text, body, status, position)
 
 def printParticipants(server):
     for players in server.jugadoresConectados:
@@ -35,7 +40,7 @@ def battleMatch(server):
     matchOngoing = True
     turnCount = 1
     print("Turno jugador: {}".format(turnCount))
-    serverResponse("Es el turno del jugador {}!".format(turnCount), "s", 1, [])
+    serverResponseGlobal(server, "Es el turno del jugador {}!".format(turnCount), "s", 1, [])
     while(matchOngoing):
         # Recibir acciones de participantes
         bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
@@ -58,7 +63,7 @@ def battleMatch(server):
             while(server.jugadoresConectados[turnCount-1].vida == 0):
                 turnCount += 1
             print("Turno jugador: {}".format(turnCount))
-            serverResponse("Es el turno del jugador {}!".format(turnCount), "s", 1, [])
+            serverResponseGlobal(server, "Es el turno del jugador {}".format(turnCount), "s", 1, [])
             
 
 # Listen for incoming datagrams
@@ -77,10 +82,10 @@ while(True):
 
         # Conecta a un jugador
         clientIP = "Client {}: {}".format(len(server.jugadoresConectados)+1, address)
-        server.conectarJugador(BattleClasses.Jugador(clientIP))
+        server.conectarJugador(BattleClasses.Jugador(clientIP, address))
 
         # Confirma al jugador
-        serverResponse("Conexion correcta! Eres el jugador {}".format(len(server.jugadoresConectados)), clientMsg, 1, [])
+        serverResponse(address, "Conexion correcta! Eres el jugador {}".format(len(server.jugadoresConectados)), clientMsg, 1, [])
 
         # Quienes estan conectados en el server
         print("JUGADORES CONECTADOS:")
@@ -90,7 +95,7 @@ while(True):
     elif (clientMsg == "s"):
         # Confirmacion de inicio de partida
         print("Un jugador dio la orden de empezar una partida")
-        serverResponse("Se empezo la partida!",clientMsg, 1, [])
+        serverResponseGlobal(server, "Se empezo la partida!",clientMsg, 1, [])
 
         # Quienes estan participando de la partida en el server
         print("JUGADORES PARTICIPANTES:")
@@ -104,4 +109,4 @@ while(True):
     else:
         # Comando erroneo
         print("Denegacion de comando entrante")
-        serverResponse("Comando erroneo, intente denuevo", clientMsg, 0, [])
+        serverResponse(address, "Comando erroneo, intente denuevo", clientMsg, 0, [])
