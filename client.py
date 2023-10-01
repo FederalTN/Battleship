@@ -59,7 +59,17 @@ while(connected):
 
     onMatch = True
     while(onMatch):
+        # Recibir confirmacion de turnos
         receivedJson = receiveRespond()
+        # Si es tu turno puedes hacer acciones
+        if(receivedJson["status"] == 1):
+            inputString = input("\nDONDE ATACAS?: ")
+            sendAction("a", "", "", inputString)
+            # Confirmacion de accion propia
+            receivedJson = receiveRespond()
+        else:
+            # Esperar confirmacion de accion de otro jugador
+            receivedJson = receiveRespond()
     
 
 

@@ -31,6 +31,12 @@ def serverResponseGlobal(server, text, body, status, position):
         address = players.address
         serverResponse(address, text, body, status, position)
 
+def serverResponseGlobalExcept(server, excepted, text, body, status, position):
+    for index, players in enumerate(server.jugadoresConectados):
+        if index != excepted:
+            address = players.address
+            serverResponse(address, text, body, status, position)
+
 def printParticipants(server):
     for players in server.jugadoresConectados:
         print(players.nombre)
@@ -39,31 +45,41 @@ def printParticipants(server):
 def battleMatch(server):
     matchOngoing = True
     turnCount = 1
-    print("Turno jugador: {}".format(turnCount))
-    serverResponseGlobal(server, "Es el turno del jugador {}!".format(turnCount), "s", 1, [])
     while(matchOngoing):
+        # Avisa y maneja los turnos
+        print("Turno jugador: {}".format(turnCount))
+        addressInTurn = server.jugadoresConectados[turnCount-1].address
+        serverResponse(addressInTurn, "Es tu turno", "s", 1, [])
+        serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}".format(turnCount), "s", 0, [])
+
         # Recibir acciones de participantes
         bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
         message = bytesAddressPair[0]
         address = bytesAddressPair[1]
 
-        if(("Client {}: {}".format(turnCount, address)) == server.jugadoresConectados[turnCount-1].nombre):
-            # Mantiene un orden ciclico de turnos
-            if(turnCount == len(server.jugadoresConectados)):
-                turnCount = 0
+        # Verifica si es el address del jugador en turno
+        if(address == addressInTurn):
             # Decodifica el mensaje JSON
             receivedJson = json.loads(message.decode())
-            clientMsg = receivedJson["action"]
-
+            clientMsg = (receivedJson["action"],receivedJson["position"])
             print(clientMsg)
 
+            serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]), "a", 1, receivedJson["position"])
+            serverResponseGlobalExcept(server, turnCount-1,
+                                       "El jugador {} ataco la posicion {}!".format(turnCount, receivedJson["position"]),
+                                       "a", 1, receivedJson["position"])
 
-            # Salta a los perdedores y informa el turno
+            # Mantiene un orden ciclico de turnos
             turnCount += 1
-            while(server.jugadoresConectados[turnCount-1].vida == 0):
+            if(turnCount > len(server.jugadoresConectados)):
+                turnCount = 1
+            # Salta los turnos de jugadores perdedores
+            while(server.jugadoresConectados[turnCount-1].vidas == 0):
                 turnCount += 1
-            print("Turno jugador: {}".format(turnCount))
-            serverResponseGlobal(server, "Es el turno del jugador {}".format(turnCount), "s", 1, [])
+                if(turnCount > len(server.jugadoresConectados)):
+                    turnCount = 1
+
+            
             
 
 # Listen for incoming datagrams
