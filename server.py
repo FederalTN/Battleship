@@ -36,18 +36,18 @@ def serverResponseGlobalExcept(server, excepted, text, body, status, position):
         if index != excepted:
             address = players.address
             serverResponse(address, text, body, status, position)
-#  Calcula el orden ciclico de turnos
+# Calcula el orden ciclico de turnos
 def turnCalculate(turnCount, server):
     turnCount += 1
     if(turnCount > len(server.jugadoresConectados)):
         turnCount = 1
     # Salta los turnos de jugadores perdedores
-    while(server.jugadoresConectados[turnCount-1].vidas == 0):
+    while(server.jugadoresConectados[turnCount-1].vidas < 1):
         turnCount += 1
         if(turnCount > len(server.jugadoresConectados)):
             turnCount = 1
     return turnCount
-
+# Recibir un mensaje en el socket UDP
 def receiveMessage(UDPServerSocket, bufferSize):
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
     return bytesAddressPair[0], bytesAddressPair[1]
@@ -59,8 +59,8 @@ def battleMatch(server):
         # Avisa y maneja los turnos
         print("Turno jugador: {}".format(turnCount))
         addressInTurn = server.jugadoresConectados[turnCount-1].address
-        serverResponse(addressInTurn, "Es tu turno", "s", 1, [])
-        serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}".format(turnCount), "s", 0, [])
+        serverResponse(addressInTurn, "Es tu turno\n", "s", 1, [])
+        serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}\n".format(turnCount), "s", 0, [])
 
         # Recibir acciones de participantes
         message, address = receiveMessage(UDPServerSocket, bufferSize)
@@ -73,17 +73,19 @@ def battleMatch(server):
             print(clientMsg)
             # Actualiza la informacion de la partida
             attackPos = receivedJson["position"]
-            print(attackPos[0])
-            print(attackPos[1])
             for index, player in enumerate(server.jugadoresConectados):
                 if index != (turnCount-1):
-                    player.recibirAtaque(BattleClasses.Coordenada(attackPos[0], attackPos[1]))
-
-            # Avisa la accion a todos los jugadores
-            serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]), "a", 1, receivedJson["position"])
-            serverResponseGlobalExcept(server, turnCount-1,
-                                       "El jugador {} ataco la posicion {}!".format(turnCount, receivedJson["position"]),
-                                       "a", 1, receivedJson["position"])
+                    # Envia el ataque a los players y avisa si les dio
+                    hit = player.recibirAtaque(BattleClasses.Coordenada(attackPos[0], attackPos[1]))
+                    if hit:
+                        player.vidas -= 1
+                        serverResponse(player.address, "El jugador {} ataco la posicion {}, Y TE DIO!".format(turnCount, receivedJson["position"]),
+                                        "a", 1, receivedJson["position"])
+                    else:
+                        serverResponse(player.address, "El jugador {} ataco la posicion {}, no te dio".format(turnCount, receivedJson["position"]),
+                                        "a", 0, receivedJson["position"])
+            # Confirmacion para el atacante
+            serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]), "a", 0, receivedJson["position"])
             # Mantiene un orden ciclico de turnos
             turnCount = turnCalculate(turnCount, server)
 
@@ -123,7 +125,7 @@ while(True):
         server.printParticipants()
 
         # iniciar partida
-        server.iniciarPartida # aun no hace nada xd
+        #server.iniciarPartida # aun no hace nada xd
         # while de partida en curso
         battleMatch(server)
 

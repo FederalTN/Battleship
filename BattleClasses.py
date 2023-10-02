@@ -11,7 +11,7 @@ class Barco:
         self.tipo = tipo
         self.estado = "intacto"
         
-    def recibirAtaque(self):
+    def recibirDaño(self):
         if self.estado == "intacto":
             self.estado = "dañado"
 
@@ -29,7 +29,7 @@ class Casilla:
 
     def atacarCasilla(self):
         if self.estado == "ocupado" and self.barco:
-            self.barco.recibirAtaque()
+            self.barco.recibirDaño()
             return True
         return False
 
