@@ -72,9 +72,12 @@ def battleMatch(server):
             clientMsg = (receivedJson["action"],receivedJson["position"])
             print(clientMsg)
             # Actualiza la informacion de la partida
+            attackPos = receivedJson["position"]
+            print(attackPos[0])
+            print(attackPos[1])
             for index, player in enumerate(server.jugadoresConectados):
                 if index != (turnCount-1):
-                    player.recibirAtaque(receivedJson["position"])
+                    player.recibirAtaque(BattleClasses.Coordenada(attackPos[0], attackPos[1]))
 
             # Avisa la accion a todos los jugadores
             serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]), "a", 1, receivedJson["position"])
