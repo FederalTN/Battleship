@@ -52,6 +52,7 @@ def receiveMessage(UDPServerSocket, bufferSize):
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
     return bytesAddressPair[0], bytesAddressPair[1]
 
+# Se maneja la batalla de barcos
 def battleMatch(server):
     matchOngoing = True
     turnCount = 1
@@ -84,8 +85,10 @@ def battleMatch(server):
                     else:
                         serverResponse(player.address, "El jugador {} ataco la posicion {}, no te dio".format(turnCount, receivedJson["position"]),
                                         "a", 0, receivedJson["position"])
-            # Confirmacion para el atacante
-            serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]), "a", 0, receivedJson["position"])
+                else:
+                    # Confirmacion para el atacante
+                    serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]),
+                                    "a", 0, receivedJson["position"])
             # Mantiene un orden ciclico de turnos
             turnCount = turnCalculate(turnCount, server)
 
