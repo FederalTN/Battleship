@@ -19,7 +19,7 @@ fleet = {
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 # Envio de mensajes
-def sendAction(body, type, fleet, pos):
+def sendAction(body, type, fleet, pos: list):
     msgFromClient = {
         "action": body, # connection, attack, lose, build, disconnect, select
         "bot": type, # 0 o 1, 1: partida vs bot, 0: partida vs otro cliente
@@ -64,9 +64,11 @@ while(connected):
         # Si es tu turno puedes hacer acciones
         if(receivedJson["status"] == 1):
             inputString = input("\nDONDE ATACAS?: ")
-            sendAction("a", "", "", inputString)
+            coordenadas = inputString.split()
+            sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
             # Confirmacion de accion propia
             receivedJson = receiveRespond()
+        # Si no es tu turno debes esperar a que lo sea
         else:
             # Esperar confirmacion de accion de otro jugador
             receivedJson = receiveRespond()

@@ -24,6 +24,8 @@ test:
 
 {"p": [1,1,0], "b": [1,2,1], "s": [2,3,0]}
 
-
+msgFromClient = {
+        "position": (x,y), # posicion de ataque
+    }
 
 

@@ -14,14 +14,14 @@ class Barco:
     def recibirAtaque(self):
         if self.estado == "intacto":
             self.estado = "dañado"
-            
+
     def hundir(self):
         self.estado = "hundido"
 
 class Casilla:
     def __init__(self):
-        self.estado = "vacío"
         self.barco = None
+        self.estado = "vacío"
 
     def agregarBarco(self, barco: Barco):
         self.barco = barco
@@ -42,7 +42,7 @@ class Tablero:
             self.casillas[coord.x][coord.y].agregarBarco(barco)
 
     def realizarAtaque(self, coordenada: Coordenada):
-        return self.casillas[coordenada.x][coordenada.y].atacarCasilla()
+        return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasilla()
 
 class Jugador:
     def __init__(self, nombre: str, address):
@@ -51,7 +51,7 @@ class Jugador:
         self.tablero = Tablero()
         self.vidas = 6
 
-    def realizarAccion(self, coordenada: Coordenada):
+    def recibirAtaque(self, coordenada: Coordenada):
         return self.tablero.realizarAtaque(coordenada)
 
 class Servidor:
@@ -61,6 +61,12 @@ class Servidor:
     def conectarJugador(self, jugador: Jugador):
         self.jugadoresConectados.append(jugador)
         print(("Conectado el jugador: {}".format(jugador.nombre)))
+
+    def printParticipants(self):
+        listaPlayers = self.jugadoresConectados
+        for players in listaPlayers:
+            print(players.nombre)
+        print("")
 
     def iniciarPartida(self):
         # Implementar lógica para emparejar jugadores e iniciar una partida
@@ -84,7 +90,7 @@ class Cliente:
         pass
 
     def jugarTurno(self, coordenada: Coordenada):
-        resultado = self.jugador.realizarAccion(coordenada)
+        resultado = self.jugador.recibirAtaque(coordenada)
         # Enviar resultado al servidor y recibir actualizaciones
         pass
 
