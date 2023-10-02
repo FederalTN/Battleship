@@ -48,6 +48,10 @@ def turnCalculate(turnCount, server):
             turnCount = 1
     return turnCount
 
+def receiveMessage(UDPServerSocket, bufferSize):
+    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+    return bytesAddressPair[0], bytesAddressPair[1]
+
 def battleMatch(server):
     matchOngoing = True
     turnCount = 1
@@ -59,9 +63,7 @@ def battleMatch(server):
         serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}".format(turnCount), "s", 0, [])
 
         # Recibir acciones de participantes
-        bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-        message = bytesAddressPair[0]
-        address = bytesAddressPair[1]
+        message, address = receiveMessage(UDPServerSocket, bufferSize)
 
         # Verifica si es el address del jugador en turno
         if(address == addressInTurn):
@@ -69,20 +71,24 @@ def battleMatch(server):
             receivedJson = json.loads(message.decode())
             clientMsg = (receivedJson["action"],receivedJson["position"])
             print(clientMsg)
+            # Actualiza la informacion de la partida
+            for index, player in enumerate(server.jugadoresConectados):
+                if index != (turnCount-1):
+                    player.recibirAtaque(receivedJson["position"])
+
             # Avisa la accion a todos los jugadores
             serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]), "a", 1, receivedJson["position"])
             serverResponseGlobalExcept(server, turnCount-1,
                                        "El jugador {} ataco la posicion {}!".format(turnCount, receivedJson["position"]),
                                        "a", 1, receivedJson["position"])
-
             # Mantiene un orden ciclico de turnos
             turnCount = turnCalculate(turnCount, server)
 
+
+
 # Listen for incoming datagrams
 while(True):
-    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-    message = bytesAddressPair[0]
-    address = bytesAddressPair[1]
+    message, address = receiveMessage(UDPServerSocket, bufferSize)
 
     # Decodifica el mensaje JSON
     receivedJson = json.loads(message.decode())
