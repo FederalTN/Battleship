@@ -28,7 +28,7 @@ class Casilla:
         self.estado = "ocupado"
 
     def atacarCasilla(self):
-        if self.estado == "ocupado" and self.barco:
+        if self.estado == "ocupado" and self.barco.estado == "intacto":
             self.barco.recibirDaño()
             return True
         return False
@@ -37,9 +37,16 @@ class Tablero:
     def __init__(self, dimension: int = 20):
         self.casillas = [[Casilla() for _ in range(dimension)] for _ in range(dimension)]
 
-    def colocarBarco(self, barco: Barco, coordenadas: List[Coordenada]):
-        for coord in coordenadas:
-            self.casillas[coord.x][coord.y].agregarBarco(barco)
+    def colocarBarco(self, barco: Barco, coord: Coordenada, horizontal: bool):
+        if(barco.tipo == "p"): espacios = 1
+        elif(barco.tipo == "b"): espacios = 2
+        else: espacios = 3
+        for i in range(espacios):
+            self.casillas[coord.x-1][coord.y-1].agregarBarco(barco)
+            if(horizontal):
+                coord.x += 1
+            else:
+                coord.y += 1
 
     def realizarAtaque(self, coordenada: Coordenada):
         return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasilla()

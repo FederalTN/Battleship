@@ -56,6 +56,18 @@ def receiveMessage(UDPServerSocket, bufferSize):
 def battleMatch(server):
     matchOngoing = True
     turnCount = 1
+
+    for players in server.jugadoresConectados:
+        serverResponse(players.address, "CONSTRUYE TUS BARCOS\n", "b", 1, [])
+        message, address = receiveMessage(UDPServerSocket, bufferSize)
+        receivedJson = json.loads(message.decode())
+        for battleship in receivedJson["ships"]:
+            shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
+            horizontalidad = True if shipData[2] == 1 else False
+            print(horizontalidad)
+            players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
+
+
     while(matchOngoing):
         # Avisa y maneja los turnos
         print("Turno jugador: {}".format(turnCount))
@@ -121,7 +133,7 @@ while(True):
     elif (clientMsg == "s"):
         # Confirmacion de inicio de partida
         print("Un jugador dio la orden de empezar una partida")
-        serverResponseGlobal(server, "Se empezo la partida!",clientMsg, 1, [])
+        serverResponseGlobal(server, "Se empezo la partida! espera tu turno!",clientMsg, 1, [])
 
         # Quienes estan participando de la partida en el server
         print("JUGADORES PARTICIPANTES:")

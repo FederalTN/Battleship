@@ -51,7 +51,7 @@ while(connected):
     inputString = input("\nESPERAR MAS JUGADORES O QUIERES INICIAR LA PARTIDA?(S/n): ")
     
     if(inputString == "S" or inputString == "s"):
-        sendAction("s", "", "", "")
+        sendAction("s", "", "", [])
         receivedJson = receiveRespond()
     elif(inputString == "N" or inputString == "n"):
         print("Esperando a que inicien la partida...")
@@ -60,14 +60,29 @@ while(connected):
     onMatch = True
     while(onMatch):
         # Recibir confirmacion de turnos
+        print("Recibiendo orden de turno...")
         receivedJson = receiveRespond()
         # Si es tu turno puedes hacer acciones
         if(receivedJson["status"] == 1):
-            inputString = input("\nDONDE ATACAS?: ")
-            coordenadas = inputString.split()
-            sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
-            # Confirmacion de accion propia
-            receivedJson = receiveRespond()
+            if(receivedJson["action"] == "s"):
+                inputString = input("\nDONDE ATACAS? X Y: ")
+                coordenadas = inputString.split()
+                sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
+                # Confirmacion de accion propia
+                receivedJson = receiveRespond()
+            
+            elif(receivedJson["action"] == "b"):
+                inputPatrol = input("\nDONDE ESTARA EL BARCO PATRULLA? X Y ORIENTATION: ")
+                inputBattleship = input("\nDONDE ESTARA EL BARCO ACORAZADO? X Y ORIENTATION: ")
+                inputSubmarine = input("\nDONDE ESTARA EL SUBMARINO? X Y ORIENTATION: ")
+                buildOrderP = inputPatrol.split()
+                buildOrderB = inputBattleship.split()
+                buildOrderS = inputSubmarine.split()
+
+                sendAction("b", "", { "p": [buildOrderP[0], buildOrderP[1], buildOrderP[2]],
+                                      "b": [buildOrderB[0], buildOrderB[1], buildOrderB[2]],
+                                      "s": [buildOrderS[0], buildOrderS[1], buildOrderS[2]] }, [])
+
         # Si no es tu turno debes esperar a que lo sea
         else:
             # Esperar confirmacion de accion de otro jugador
