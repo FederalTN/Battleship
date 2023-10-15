@@ -1,6 +1,6 @@
 Cliente
 {
-  "action": "c, a, l, b, d, s", # connection, attack, lose, build, disconnect, select
+  "action": "c, a, l, b, d, s, t, w", # connection, attack, lose, build, disconnect, select, turno, win
   "bot": 0, # 0 o 1, 1: partida vs bot, 0: partida vs otro cliente
 
   "ships": {
@@ -9,14 +9,17 @@ Cliente
             "s": [x,y,0]
            },
   "position": [x,y], # posicion de ataque
+  "reserva1" : "", #Campo reservado para uso futuro o mejora 
+  "reserva2" : ""  #Campo reservado para uso futuro o mejora
 }
 
 Server
 {
-  "action": "c, a, l, b, d, s", # Accion recibida, confirmando
+  "action": "c, a, l, b, d, s, t, w", # Accion recibida, confirmando
   "status": , # [0: False, 1: True] si la accion del cliente es correcta o no
-  "position":  [x,y] # utlimas coordenadas jugadas x un usuario
- 
+  "position":  [x,y], # utlimas coordenadas jugadas x un usuario
+  "reserva1" : "",
+  "reserva2" : ""
 }
 
 

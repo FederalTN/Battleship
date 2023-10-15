@@ -133,16 +133,20 @@ while(True):
     elif (clientMsg == "s"):
         # Confirmacion de inicio de partida
         print("Un jugador dio la orden de empezar una partida")
-        serverResponseGlobal(server, "Se empezo la partida! espera tu turno!",clientMsg, 1, [])
 
-        # Quienes estan participando de la partida en el server
-        print("JUGADORES PARTICIPANTES:")
-        server.printParticipants()
+        # Partida PVP
+        if (receivedJson["bot"] == 0):
+            if (len(server.jugadoresConectados) > 1):
+                serverResponseGlobal(server, "Se empezo la partida! espera tu turno!", clientMsg, 1, [])
 
-        # iniciar partida
-        #server.iniciarPartida # aun no hace nada xd
-        # while de partida en curso
-        battleMatch(server)
+                # Quienes estan participando de la partida en el server
+                print("JUGADORES PARTICIPANTES:")
+                server.printParticipants()
+
+                # iniciar partida
+                #server.iniciarPartida # aun no hace nada xd
+                # while de partida en curso
+                battleMatch(server)
 
     else:
         # Comando erroneo

@@ -48,14 +48,17 @@ connected = False
 if((receivedJson["action"],receivedJson["status"]) == ("c",1)): connected = True
 while(connected):
 
-    inputString = input("\nESPERAR MAS JUGADORES O QUIERES INICIAR LA PARTIDA?(S/n): ")
+    inputString = input("\nJUGAR CONTRA UN JUGADOR?(S/n): ")
     
     if(inputString == "S" or inputString == "s"):
-        sendAction("s", "", "", [])
+        sendAction("s", 0, "", [])
+        print("Esperando a que conecte otro jugador...")
         receivedJson = receiveRespond()
     elif(inputString == "N" or inputString == "n"):
-        print("Esperando a que inicien la partida...")
+        sendAction("s", 1, "", [])
         receivedJson = receiveRespond()
+        print("Partida VS bot")
+
 
     onMatch = True
     while(onMatch):
