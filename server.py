@@ -64,10 +64,7 @@ def battleMatch(server):
         for battleship in receivedJson["ships"]:
             shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
             horizontalidad = True if shipData[2] == 1 else False
-            print(horizontalidad)
-            print((shipData[0], shipData[1]))
             players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
-
 
     while(matchOngoing):
         # Avisa y maneja los turnos

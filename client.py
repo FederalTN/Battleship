@@ -9,12 +9,6 @@ bufferSize = 1024
 
 # xd client = BattleClasses.Cliente("Federal", localPort)
 
-# barcos del cliente
-fleet = {
-    "p": [1,1,0], # cordenada (x,y) y orientación (0: vertical, 1: horizontal)
-    "b": [1,2,1],
-    "s": [2,3,0]
-}
 # Create a UDP socket at client side
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
@@ -38,7 +32,21 @@ def receiveRespond():
     msg = "Message from Server: {}".format(receivedJson["response"])
     print(msg)
     return receivedJson
+# Verificar si dos barcos se sobrelapan
+def is_overlap(ship1, ship2):
+    x1, y1, orientation1 = ship1
+    x2, y2, orientation2 = ship2
 
+    if orientation1 == 0:  # Barco 1 es vertical
+        if orientation2 == 0:  # Barco 2 es vertical
+            return abs(x1 - x2) < 1 and abs(y1 - y2) < 1
+        else:  # Barco 2 es horizontal
+            return x1 == x2 and y2 <= y1 <= y2 + 2
+    else:  # Barco 1 es horizontal
+        if orientation2 == 0:  # Barco 2 es vertical
+            return x2 == x1 and y1 <= y2 <= y1 + 2
+        else:  # Barco 2 es horizontal
+            return abs(y1 - y2) < 1 and abs(x1 - x2) < 2
 # accion para la conexion
 sendAction("c", "", "", "")
 receivedJson = receiveRespond()
@@ -84,16 +92,26 @@ while(connected):
                     receivedJson = receiveRespond()
             
             elif(receivedJson["action"] == "b"):
-                inputPatrol = input("\nDONDE ESTARA EL BARCO PATRULLA? X Y ORIENTATION: ")
-                inputBattleship = input("\nDONDE ESTARA EL BARCO ACORAZADO? X Y ORIENTATION: ")
-                inputSubmarine = input("\nDONDE ESTARA EL SUBMARINO? X Y ORIENTATION: ")
-                buildOrderP = inputPatrol.split()
-                buildOrderB = inputBattleship.split()
-                buildOrderS = inputSubmarine.split()
-                print(buildOrderS[0], buildOrderS[1], buildOrderS[2])
-                sendAction("b", "", { "p": [buildOrderP[0], buildOrderP[1], buildOrderP[2]],
-                                      "b": [buildOrderB[0], buildOrderB[1], buildOrderB[2]],
-                                      "s": [buildOrderS[0], buildOrderS[1], buildOrderS[2]] }, [])
+                while True:
+                    inputPatrol = input("\nDONDE ESTARA EL BARCO PATRULLA? X Y ORIENTATION: ")
+                    inputBattleship = input("\nDONDE ESTARA EL BARCO ACORAZADO? X Y ORIENTATION: ")
+                    inputSubmarine = input("\nDONDE ESTARA EL SUBMARINO? X Y ORIENTATION: ")
+                    
+                    buildOrderP = inputPatrol.split()
+                    buildOrderB = inputBattleship.split()
+                    buildOrderS = inputSubmarine.split()
+                    
+                    p = [int(buildOrderP[0]), int(buildOrderP[1]), int(buildOrderP[2])]
+                    b = [int(buildOrderB[0]), int(buildOrderB[1]), int(buildOrderB[2])]
+                    s = [int(buildOrderS[0]), int(buildOrderS[1]), int(buildOrderS[2])]
+                    
+                    # Comprobar si los barcos se sobrelapan
+                    if is_overlap(p, b) or is_overlap(p, s) or is_overlap(b, s):
+                        print("Los barcos se sobrelapan. Introduce las posiciones nuevamente.")
+                    else:
+                        # Si no se sobrelapan, salir del bucle
+                        break
+                sendAction("b", "", { "p": p, "b": b, "s": s }, [])
             # Verifica si ganaste derrotando al rival
             elif(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
