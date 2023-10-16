@@ -65,6 +65,7 @@ def battleMatch(server):
             shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
             horizontalidad = True if shipData[2] == 1 else False
             print(horizontalidad)
+            print((shipData[0], shipData[1]))
             players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
 
 
@@ -72,8 +73,8 @@ def battleMatch(server):
         # Avisa y maneja los turnos
         print("Turno jugador: {}".format(turnCount))
         addressInTurn = server.jugadoresConectados[turnCount-1].address
-        serverResponse(addressInTurn, "Es tu turno\n", "s", 1, [])
-        serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}\n".format(turnCount), "s", 0, [])
+        serverResponse(addressInTurn, "Es tu turno\n", "t", 1, [])
+        serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}\n".format(turnCount), "t", 0, [])
 
         # Recibir acciones de participantes
         message, address = receiveMessage(UDPServerSocket, bufferSize)
@@ -84,25 +85,37 @@ def battleMatch(server):
             receivedJson = json.loads(message.decode())
             clientMsg = (receivedJson["action"],receivedJson["position"])
             print(clientMsg)
-            # Actualiza la informacion de la partida
-            attackPos = receivedJson["position"]
-            for index, player in enumerate(server.jugadoresConectados):
-                if index != (turnCount-1):
-                    # Envia el ataque a los players y avisa si les dio
-                    hit = player.recibirAtaque(BattleClasses.Coordenada(attackPos[0], attackPos[1]))
-                    if hit:
-                        player.vidas -= 1
-                        serverResponse(player.address, "El jugador {} ataco la posicion {}, Y TE DIO!".format(turnCount, receivedJson["position"]),
-                                        "a", 1, receivedJson["position"])
-                    else:
-                        serverResponse(player.address, "El jugador {} ataco la posicion {}, no te dio".format(turnCount, receivedJson["position"]),
-                                        "a", 0, receivedJson["position"])
+
+            if (receivedJson["action"] == "d"):
+                for index, player in enumerate(server.jugadoresConectados):
+                        if index != (turnCount-1):
+                            serverResponse(player.address, "Ganaste por desconexion del rival", "w", 1, "")
+                        else:
+                            serverResponse(addressInTurn, "Desconectaste del servidor", "d", 1, "")
+            elif (receivedJson["action"] == "a"):
+                # Actualiza la informacion de la partida en un ataque
+                attackPos = receivedJson["position"]
+                hit = False # Variable booleana que comprueba si el atacante logro un acierto
+                for index, player in enumerate(server.jugadoresConectados):
+                    if index != (turnCount-1):
+                        # Envia el ataque a los players y avisa si les dio
+                        hurt = player.recibirAtaque(BattleClasses.Coordenada(attackPos[0], attackPos[1]))
+                        if (hit == False) & (hurt): hit = True
+                        if hurt:
+                            serverResponse(player.address, "El jugador {} ataco la posicion {}, Y TE DIO!".format(turnCount, receivedJson["position"]),
+                                            "a", 1, receivedJson["position"])
+                        else:
+                            serverResponse(player.address, "El jugador {} ataco la posicion {}, no te dio".format(turnCount, receivedJson["position"]),
+                                            "a", 0, receivedJson["position"])
+                # Confirmacion para el atacante
+                if hit: 
+                    serverResponse(addressInTurn, "Atacaste en la posicion: {} y ACERTASTE".format(receivedJson["position"]),
+                                    "a", 1, receivedJson["position"])
                 else:
-                    # Confirmacion para el atacante
-                    serverResponse(addressInTurn, "Atacaste en la posicion: {}".format(receivedJson["position"]),
-                                    "a", 0, receivedJson["position"])
-            # Mantiene un orden ciclico de turnos
-            turnCount = turnCalculate(turnCount, server)
+                    serverResponse(addressInTurn, "Atacaste en la posicion: {} y fallaste".format(receivedJson["position"]),
+                                    "a", 1, receivedJson["position"])                
+                # Mantiene un orden ciclico de turnos
+                turnCount = turnCalculate(turnCount, server)
 
 
 

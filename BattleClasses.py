@@ -28,8 +28,10 @@ class Casilla:
         self.estado = "ocupado"
 
     def atacarCasilla(self):
+        print(self.barco, self.estado)
         if self.estado == "ocupado" and self.barco.estado == "intacto":
             self.barco.recibirDaño()
+            print("acerto!!")
             return True
         return False
 
@@ -42,11 +44,14 @@ class Tablero:
         elif(barco.tipo == "b"): espacios = 2
         else: espacios = 3
         for i in range(espacios):
-            self.casillas[coord.x-1][coord.y-1].agregarBarco(barco)
+            print((coord.x, coord.y))
+            barconuevo = Barco(barco.tipo)
+            self.casillas[coord.x-1][coord.y-1].agregarBarco(barconuevo)
             if(horizontal):
                 coord.x += 1
             else:
                 coord.y += 1
+            
 
     def realizarAtaque(self, coordenada: Coordenada):
         return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasilla()
@@ -59,7 +64,9 @@ class Jugador:
         self.vidas = 6
 
     def recibirAtaque(self, coordenada: Coordenada):
-        return self.tablero.realizarAtaque(coordenada)
+        acertado = self.tablero.realizarAtaque(coordenada)
+        if acertado: self.vidas -= 1
+        return acertado
 
 class Servidor:
     def __init__(self):

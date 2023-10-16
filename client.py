@@ -67,12 +67,21 @@ while(connected):
         receivedJson = receiveRespond()
         # Si es tu turno puedes hacer acciones
         if(receivedJson["status"] == 1):
-            if(receivedJson["action"] == "s"):
+            if(receivedJson["action"] == "t"):
                 inputString = input("\nDONDE ATACAS? X Y: ")
-                coordenadas = inputString.split()
-                sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
-                # Confirmacion de accion propia
-                receivedJson = receiveRespond()
+
+                # Avisar al servidor de que te desconectaras (En vez de atacar)
+                if(inputString == "D" or inputString == "d"):
+                    sendAction("d", 0, "", [])
+                    print("Esperando a que conecte otro jugador...")
+                    receivedJson = receiveRespond()
+                    onMatch, connected = False, False
+                    # ALT: break # Permitira hacer otra partida
+                else:
+                    coordenadas = inputString.split()
+                    sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
+                    # Confirmacion de accion propia
+                    receivedJson = receiveRespond()
             
             elif(receivedJson["action"] == "b"):
                 inputPatrol = input("\nDONDE ESTARA EL BARCO PATRULLA? X Y ORIENTATION: ")
@@ -81,15 +90,29 @@ while(connected):
                 buildOrderP = inputPatrol.split()
                 buildOrderB = inputBattleship.split()
                 buildOrderS = inputSubmarine.split()
-
+                print(buildOrderS[0], buildOrderS[1], buildOrderS[2])
                 sendAction("b", "", { "p": [buildOrderP[0], buildOrderP[1], buildOrderP[2]],
                                       "b": [buildOrderB[0], buildOrderB[1], buildOrderB[2]],
                                       "s": [buildOrderS[0], buildOrderS[1], buildOrderS[2]] }, [])
+            # Verifica si ganaste derrotando al rival
+            elif(receivedJson["action"] == "w"):
+                print("\nGANASTE!!!!!!")
+                onMatch, connected = False, False
+
+            # Verifica si perdiste por tener 0 vidas
+            elif(receivedJson["action"] == "l"):
+                print("\nPERDISTE!!!!!!")
+                onMatch, connected = False, False
 
         # Si no es tu turno debes esperar a que lo sea
         else:
             # Esperar confirmacion de accion de otro jugador
             receivedJson = receiveRespond()
+            # Verifica si ganaste por desconexion del rival
+            if(receivedJson["action"] == "w"):
+                print("\nGANASTE!!!!!!")
+                onMatch, connected = False, False
+
     
 
 
