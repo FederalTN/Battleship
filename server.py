@@ -110,7 +110,7 @@ def battleMatch(server):
                                     "a", 1, receivedJson["position"])
                 else:
                     serverResponse(addressInTurn, "Atacaste en la posicion: {} y fallaste".format(receivedJson["position"]),
-                                    "a", 1, receivedJson["position"])                
+                                    "a", 0, receivedJson["position"])                
                 # Mantiene un orden ciclico de turnos
                 turnCount = turnCalculate(turnCount, server)
 

@@ -33,20 +33,30 @@ def receiveRespond():
     print(msg)
     return receivedJson
 # Verificar si dos barcos se sobrelapan
-def is_overlap(ship1, ship2):
-    x1, y1, orientation1 = ship1
-    x2, y2, orientation2 = ship2
+def are_ships_overlapping(ships):
+    for ship1 in ships:
+        for ship2 in ships:
+            if ship1 != ship2:
+                print(ship1, ships[ship1], ship2 , ships[ship2])
+                x1 , y1, orientation1 = ships[ship1]
+                _ , _, orientation2 = ships[ship2]
+                z1 = 1 if ship1 == "p" else (2 if ship1 == "b" else 3)
+                z2 = 1 if ship2 == "p" else (2 if ship2 == "b" else 3)
 
-    if orientation1 == 0:  # Barco 1 es vertical
-        if orientation2 == 0:  # Barco 2 es vertical
-            return abs(x1 - x2) < 1 and abs(y1 - y2) < 1
-        else:  # Barco 2 es horizontal
-            return x1 == x2 and y2 <= y1 <= y2 + 2
-    else:  # Barco 1 es horizontal
-        if orientation2 == 0:  # Barco 2 es vertical
-            return x2 == x1 and y1 <= y2 <= y1 + 2
-        else:  # Barco 2 es horizontal
-            return abs(y1 - y2) < 1 and abs(x1 - x2) < 2
+                for _ in range(z1):
+                    x2 , y2, _ = ships[ship2]
+                    for _ in range(z2):
+                        print(x1, y1, x2, y2)
+                        if (x1, y1) == (x2, y2): return True
+                        if orientation2 == 0:  # Vertical
+                            y2 += 1
+                        else:
+                            x2 += 1
+                    if orientation1 == 0:  # Vertical
+                        y1 += 1
+                    else:
+                        x1 += 1
+    return False
 # accion para la conexion
 sendAction("c", "", "", "")
 receivedJson = receiveRespond()
@@ -96,22 +106,23 @@ while(connected):
                     inputPatrol = input("\nDONDE ESTARA EL BARCO PATRULLA? X Y ORIENTATION: ")
                     inputBattleship = input("\nDONDE ESTARA EL BARCO ACORAZADO? X Y ORIENTATION: ")
                     inputSubmarine = input("\nDONDE ESTARA EL SUBMARINO? X Y ORIENTATION: ")
-                    
+
                     buildOrderP = inputPatrol.split()
                     buildOrderB = inputBattleship.split()
                     buildOrderS = inputSubmarine.split()
-                    
-                    p = [int(buildOrderP[0]), int(buildOrderP[1]), int(buildOrderP[2])]
-                    b = [int(buildOrderB[0]), int(buildOrderB[1]), int(buildOrderB[2])]
-                    s = [int(buildOrderS[0]), int(buildOrderS[1]), int(buildOrderS[2])]
-                    
-                    # Comprobar si los barcos se sobrelapan
-                    if is_overlap(p, b) or is_overlap(p, s) or is_overlap(b, s):
-                        print("Los barcos se sobrelapan. Introduce las posiciones nuevamente.")
-                    else:
-                        # Si no se sobrelapan, salir del bucle
+
+                    ships = {
+                        "p": [int(buildOrderP[0]), int(buildOrderP[1]), int(buildOrderP[2])],
+                        "b": [int(buildOrderB[0]), int(buildOrderB[1]), int(buildOrderB[2])],
+                        "s": [int(buildOrderS[0]), int(buildOrderS[1]), int(buildOrderS[2])]
+                    }
+
+                    if not are_ships_overlapping(ships):
                         break
-                sendAction("b", "", { "p": p, "b": b, "s": s }, [])
+                    else:
+                        print("Los barcos se superponen. Introduce las coordenadas nuevamente.")
+
+                sendAction("b", "", ships, [])
             # Verifica si ganaste derrotando al rival
             elif(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
