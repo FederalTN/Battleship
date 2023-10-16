@@ -2,6 +2,7 @@ import socket
 import json
 import sys
 import BattleClasses
+import validations
 
 localIP = "127.0.0.1"
 localPort = 20001
@@ -32,31 +33,7 @@ def receiveRespond():
     msg = "Message from Server: {}".format(receivedJson["response"])
     print(msg)
     return receivedJson
-# Verificar si dos barcos se sobrelapan
-def are_ships_overlapping(ships):
-    for ship1 in ships:
-        for ship2 in ships:
-            if ship1 != ship2:
-                print(ship1, ships[ship1], ship2 , ships[ship2])
-                x1 , y1, orientation1 = ships[ship1]
-                _ , _, orientation2 = ships[ship2]
-                z1 = 1 if ship1 == "p" else (2 if ship1 == "b" else 3)
-                z2 = 1 if ship2 == "p" else (2 if ship2 == "b" else 3)
 
-                for _ in range(z1):
-                    x2 , y2, _ = ships[ship2]
-                    for _ in range(z2):
-                        print(x1, y1, x2, y2)
-                        if (x1, y1) == (x2, y2): return True
-                        if orientation2 == 0:  # Vertical
-                            y2 += 1
-                        else:
-                            x2 += 1
-                    if orientation1 == 0:  # Vertical
-                        y1 += 1
-                    else:
-                        x1 += 1
-    return False
 # accion para la conexion
 sendAction("c", "", "", "")
 receivedJson = receiveRespond()
@@ -117,12 +94,13 @@ while(connected):
                         "s": [int(buildOrderS[0]), int(buildOrderS[1]), int(buildOrderS[2])]
                     }
 
-                    if not are_ships_overlapping(ships):
+                    if not validations.shipOverlaps(ships):
                         break
                     else:
                         print("Los barcos se superponen. Introduce las coordenadas nuevamente.")
-
                 sendAction("b", "", ships, [])
+                # Confirmacion de construccion propia
+                receivedJson = receiveRespond()
             # Verifica si ganaste derrotando al rival
             elif(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")

@@ -1,6 +1,7 @@
 import socket
 import json
 import BattleClasses
+import validations
 
 localIP = "127.0.0.1"
 localPort = 20001
@@ -61,10 +62,14 @@ def battleMatch(server):
         serverResponse(players.address, "CONSTRUYE TUS BARCOS\n", "b", 1, [])
         message, address = receiveMessage(UDPServerSocket, bufferSize)
         receivedJson = json.loads(message.decode())
-        for battleship in receivedJson["ships"]:
-            shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
-            horizontalidad = True if shipData[2] == 1 else False
-            players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
+        if not validations.shipOverlaps(receivedJson["ships"]):
+            for battleship in receivedJson["ships"]:
+                shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
+                horizontalidad = True if shipData[2] == 1 else False
+                players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
+            serverResponse(address, "Construido con exito", "b", 1, [])
+        else:
+            serverResponse(address, "ERROR", "b", 0, [])
 
     while(matchOngoing):
         # Avisa y maneja los turnos
