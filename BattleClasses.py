@@ -9,11 +9,15 @@ class Coordenada:
 class Barco:
     def __init__(self, tipo: str):
         self.tipo = tipo
-        self.estado = "intacto"
+        self.blindaje = 0
+        self.estado = "operativo"
         
     def recibirDaño(self):
-        if self.estado == "intacto":
-            self.estado = "dañado"
+        if (self.estado == "operativo"):
+            self.blindaje -= 1
+            if (self.blindaje == 0):
+               print(self.tipo, "destruido!")
+               self.estado = "destruido"
 
     def hundir(self):
         self.estado = "hundido"
@@ -29,10 +33,12 @@ class Casilla:
 
     def atacarCasilla(self):
         print(self.barco, self.estado)
-        if self.estado == "ocupado" and self.barco.estado == "intacto":
-            self.barco.recibirDaño()
-            print("acerto!!")
-            return True
+        if (self.estado == "ocupado"):
+            if (self.barco.estado == "operativo"):
+                self.estado = "vacío"
+                self.barco.recibirDaño()
+                print("acerto!!\n")
+                return True
         return False
 
 class Tablero:
@@ -45,8 +51,9 @@ class Tablero:
         else: espacios = 3
         for i in range(espacios):
             print((coord.x, coord.y))
-            barconuevo = Barco(barco.tipo)
-            self.casillas[coord.x-1][coord.y-1].agregarBarco(barconuevo)
+            #barconuevo = Barco(barco.tipo)
+            self.casillas[coord.x-1][coord.y-1].agregarBarco(barco)
+            barco.blindaje += 1
             if(horizontal):
                 coord.x += 1
             else:
