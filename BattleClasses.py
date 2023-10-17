@@ -35,7 +35,7 @@ class Casilla:
         print(self.barco, self.estado)
         if (self.estado == "ocupado"):
             if (self.barco.estado == "operativo"):
-                self.estado = "vacío"
+                self.estado = "dañado"
                 self.barco.recibirDaño()
                 print("acerto!!\n")
                 return True
@@ -51,14 +51,12 @@ class Tablero:
         else: espacios = 3
         for i in range(espacios):
             print((coord.x, coord.y))
-            #barconuevo = Barco(barco.tipo)
             self.casillas[coord.x-1][coord.y-1].agregarBarco(barco)
             barco.blindaje += 1
             if(horizontal):
                 coord.x += 1
             else:
                 coord.y += 1
-            
 
     def realizarAtaque(self, coordenada: Coordenada):
         return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasilla()
@@ -67,6 +65,11 @@ class Jugador:
     def __init__(self, nombre: str, address):
         self.nombre = nombre
         self.address = address
+        self.tablero = Tablero()
+        self.vidas = 6
+
+    def refrescarJugador(self):
+        print("JUGADOR ACTUALIZADO")
         self.tablero = Tablero()
         self.vidas = 6
 

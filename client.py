@@ -70,7 +70,7 @@ while(connected):
                     sendAction("d", 0, "", [])
                     print("Esperando a que conecte otro jugador...")
                     receivedJson = receiveRespond()
-                    onMatch, connected = False, False
+                    onMatch = False
                     # ALT: break # Permitira hacer otra partida
                 else:
                     coordenadas = inputString.split()
@@ -104,12 +104,12 @@ while(connected):
             # Verifica si ganaste derrotando al rival
             elif(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
-                onMatch, connected = False, False
+                onMatch = False
 
             # Verifica si perdiste por tener 0 vidas
             elif(receivedJson["action"] == "l"):
                 print("\nPERDISTE!!!!!!")
-                onMatch, connected = False, False
+                onMatch = False
 
         # Si no es tu turno debes esperar a que lo sea
         else:
@@ -118,7 +118,7 @@ while(connected):
             # Verifica si ganaste por desconexion del rival
             if(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
-                onMatch, connected = False, False
+                onMatch = False
 
     
 

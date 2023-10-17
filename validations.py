@@ -3,7 +3,7 @@ def shipOverlapValidation(ships, index1: int, index2: int):
     ship1 = list(ships.keys())[index1]
     ship2 = list(ships.keys())[index2]
 
-    print(ship1, ships[ship1], ship2 , ships[ship2])
+    #print(ship1, ships[ship1], ship2 , ships[ship2])
     x1 , y1, orientation1 = ships[ship1]
     _ , _, orientation2 = ships[ship2]
     z1 = 1 if ship1 == "p" else (2 if ship1 == "b" else 3)
@@ -12,7 +12,7 @@ def shipOverlapValidation(ships, index1: int, index2: int):
     for _ in range(z1):
         x2 , y2, _ = ships[ship2]
         for _ in range(z2):
-            print(x1, y1, x2, y2)
+            #print(x1, y1, x2, y2)
             if (x1, y1) == (x2, y2): return True
             if orientation2 == 0:  # Vertical
                 y2 += 1

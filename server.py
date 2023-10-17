@@ -94,6 +94,7 @@ def battleMatch(server):
                             serverResponse(player.address, "Ganaste por desconexion del rival", "w", 1, "")
                         else:
                             serverResponse(addressInTurn, "Desconectaste del servidor", "d", 1, "")
+                break
             elif (receivedJson["action"] == "a"):
                 # Actualiza la informacion de la partida en un ataque
                 attackPos = receivedJson["position"]
@@ -120,7 +121,7 @@ def battleMatch(server):
                 turnCount = turnCalculate(turnCount, server)
 
 
-
+goStart = 0 # Contador de jugadores pidiendo partida
 # Listen for incoming datagrams
 while(True):
     message, address = receiveMessage(UDPServerSocket, bufferSize)
@@ -151,19 +152,21 @@ while(True):
 
         # Partida PVP
         if (receivedJson["bot"] == 0):
-            if (len(server.jugadoresConectados) > 1):
+            goStart += 1
+            if (goStart > 1):
                 serverResponseGlobal(server, "Se empezo la partida! espera tu turno!", clientMsg, 1, [])
 
                 # Quienes estan participando de la partida en el server
                 print("JUGADORES PARTICIPANTES:")
                 server.printParticipants()
 
-                # iniciar partida
-                #server.iniciarPartida # aun no hace nada xd
                 # while de partida en curso
                 battleMatch(server)
-
+                # Actualizacion cuando termine la partida
+                for i in range(len(server.jugadoresConectados)):
+                    server.jugadoresConectados[i].refrescarJugador()
+                goStart = 0
     else:
-        # Comando erroneo
+        # Comando de cliente erroneo
         print("Denegacion de comando entrante")
         serverResponse(address, "Comando erroneo, intente denuevo", clientMsg, 0, [])
