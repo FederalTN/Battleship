@@ -78,7 +78,7 @@ while(connected):
                             coordenadas = inputString.split()
                             coordenadas = [int(x) for x in coordenadas]
                             if (validations.AttackCoordsValidation(coordenadas)):
-                                sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
+                                sendAction("a", "", "", [coordenadas[0], coordenadas[1]])
                                 # Confirmacion de accion propia
                                 receivedJson = receiveRespond()
                                 break
@@ -128,7 +128,4 @@ while(connected):
             if(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
                 onMatch = False
-
-    
-
 

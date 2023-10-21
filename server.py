@@ -64,7 +64,8 @@ def battleMatch(server):
         receivedJson = json.loads(message.decode())
         # VALIDA la construccion de los barcos
         if (validations.shipOverlaps(receivedJson["ships"]) or validations.shipPosOutBoundsValidation(receivedJson["ships"])):
-            serverResponse(address, "ERROR", "b", 0, [])
+            serverResponse(address, "ERROR", "d", 0, [])
+            break
         else:
             for battleship in receivedJson["ships"]:
                 shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
@@ -82,8 +83,10 @@ def battleMatch(server):
         serverResponseGlobalExcept(server, turnCount-1, "Es el turno del jugador {}\n".format(turnCount), "t", 0, [])
 
         # Recibir acciones de participantes
-        message, address = receiveMessage(UDPServerSocket, bufferSize)
-
+        try:
+            message, address = receiveMessage(UDPServerSocket, bufferSize)
+        except Exception as e:
+            serverResponse(address, "ERROR\n", "d", 1, [])
         # Verifica si es el address del jugador en turno
         if(address == addressInTurn):
             # Decodifica el mensaje JSON
@@ -101,6 +104,10 @@ def battleMatch(server):
             elif (receivedJson["action"] == "a"):
                 # Actualiza la informacion de la partida en un ataque
                 attackPos = receivedJson["position"]
+                # Valida si el ataque es correcto
+                if not (validations.AttackCoordsValidation(attackPos)):
+                    serverResponse(address, "ERROR", "a", 0, [])
+                    break
                 hit = False # Variable booleana que comprueba si el atacante logro un acierto
                 for index, player in enumerate(server.jugadoresConectados):
                     if index != (turnCount-1):
@@ -129,6 +136,8 @@ def battleMatch(server):
                                     "a", 0, receivedJson["position"])                
                 # Mantiene un orden ciclico de turnos
                 turnCount = turnCalculate(turnCount, server)
+            else:
+                serverResponse(addressInTurn, "ERROR: COMANDO ERRONEO\n", "d", 1, [])
             
 
 
