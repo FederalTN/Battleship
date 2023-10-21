@@ -25,3 +25,11 @@ def shipOverlapValidation(ships, index1: int, index2: int):
     return False
 def shipOverlaps(ships):
     return shipOverlapValidation(ships, 0, 1) or shipOverlapValidation(ships, 0, 2) or shipOverlapValidation(ships, 1, 2)
+
+def shipPosOutBoundsValidation(ships: dict, dimension: int = 20):
+    for clave, valores in ships.items():
+        for valor in valores:
+            if (valor < 1) or (valor > dimension):
+                return True
+    return False
+

@@ -62,14 +62,16 @@ def battleMatch(server):
         serverResponse(players.address, "CONSTRUYE TUS BARCOS\n", "b", 1, [])
         message, address = receiveMessage(UDPServerSocket, bufferSize)
         receivedJson = json.loads(message.decode())
-        if not validations.shipOverlaps(receivedJson["ships"]):
+        # VALIDA la construccion de los barcos
+        if (validations.shipOverlaps(receivedJson["ships"]) or validations.shipPosOutBoundsValidation(receivedJson["ships"])):
+            serverResponse(address, "ERROR", "b", 0, [])
+        else:
             for battleship in receivedJson["ships"]:
                 shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
                 horizontalidad = True if shipData[2] == 1 else False
                 players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
             serverResponse(address, "Construido con exito", "b", 1, [])
-        else:
-            serverResponse(address, "ERROR", "b", 0, [])
+            
 
     DestroyedPlayer = False
     while(matchOngoing):
@@ -117,8 +119,8 @@ def battleMatch(server):
                         else:
                             serverResponse(player.address, "El jugador {} ataco la posicion {}, no te dio".format(turnCount, receivedJson["position"]),
                                             "a", 0, receivedJson["position"])
-                # Confirmacion para el atacante
                 if DestroyedPlayer: break
+                # Confirmacion para el atacante
                 if hit: 
                     serverResponse(addressInTurn, "Atacaste en la posicion: {} y ACERTASTE".format(receivedJson["position"]),
                                     "a", 1, receivedJson["position"])
@@ -127,7 +129,6 @@ def battleMatch(server):
                                     "a", 0, receivedJson["position"])                
                 # Mantiene un orden ciclico de turnos
                 turnCount = turnCalculate(turnCount, server)
-            # Comprobacion de victoria de un player
             
 
 

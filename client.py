@@ -94,10 +94,10 @@ while(connected):
                         "s": [int(buildOrderS[0]), int(buildOrderS[1]), int(buildOrderS[2])]
                     }
 
-                    if not validations.shipOverlaps(ships):
-                        break
+                    if (validations.shipOverlaps(ships) or validations.shipPosOutBoundsValidation(ships)):
+                        print("Coordenadas erronea de barcos, introduce las coordenadas nuevamente.")
                     else:
-                        print("Los barcos se superponen. Introduce las coordenadas nuevamente.")
+                        break
                 sendAction("b", "", ships, [])
                 # Confirmacion de construccion propia
                 receivedJson = receiveRespond()
