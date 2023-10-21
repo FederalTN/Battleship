@@ -1,5 +1,5 @@
 # VERIFICAR si dos barcos se sobrelapan
-def shipOverlapValidation(ships, index1: int, index2: int):
+def shipOverlapValidation(ships, index1: int, index2: int, dimension: int = 20):
     ship1 = list(ships.keys())[index1]
     ship2 = list(ships.keys())[index2]
 
@@ -13,7 +13,8 @@ def shipOverlapValidation(ships, index1: int, index2: int):
         x2 , y2, _ = ships[ship2]
         for _ in range(z2):
             #print(x1, y1, x2, y2)
-            if (x1, y1) == (x2, y2): return True
+            #Valida si hay un overlap con el otro barco o con los bordes del tablero
+            if (x1, y1) == (x2, y2) or x1 > dimension or y1 > dimension or x1 < 1 or y1 < 1 or x2 > dimension or y2 > dimension or x2 < 1 or y2 < 1: return True
             if orientation2 == 0:  # Vertical
                 y2 += 1
             else:

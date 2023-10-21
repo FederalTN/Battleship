@@ -1,5 +1,6 @@
 import socket
 import json
+import sys
 import BattleClasses
 import validations
 
