@@ -71,6 +71,7 @@ def battleMatch(server):
         else:
             serverResponse(address, "ERROR", "b", 0, [])
 
+    DestroyedPlayer = False
     while(matchOngoing):
         # Avisa y maneja los turnos
         print("Turno jugador: {}".format(turnCount))
@@ -107,10 +108,17 @@ def battleMatch(server):
                         if hurt:
                             serverResponse(player.address, "El jugador {} ataco la posicion {}, Y TE DIO!".format(turnCount, receivedJson["position"]),
                                             "a", 1, receivedJson["position"])
+                            if (player.vidas == 0):
+                                serverResponse(player.address, "Te quedaste sin vidas y perdiste...", "l", 1, "")
+                                serverResponse(addressInTurn, "Atacaste en la posicion: {} y GANASTE".format(receivedJson["position"]),
+                                                 "a", 1, receivedJson["position"])
+                                serverResponse(addressInTurn, "Ganaste destruyendo a tu rival!", "w", 1, "")
+                                DestroyedPlayer = True
                         else:
                             serverResponse(player.address, "El jugador {} ataco la posicion {}, no te dio".format(turnCount, receivedJson["position"]),
                                             "a", 0, receivedJson["position"])
                 # Confirmacion para el atacante
+                if DestroyedPlayer: break
                 if hit: 
                     serverResponse(addressInTurn, "Atacaste en la posicion: {} y ACERTASTE".format(receivedJson["position"]),
                                     "a", 1, receivedJson["position"])
@@ -119,6 +127,8 @@ def battleMatch(server):
                                     "a", 0, receivedJson["position"])                
                 # Mantiene un orden ciclico de turnos
                 turnCount = turnCalculate(turnCount, server)
+            # Comprobacion de victoria de un player
+            
 
 
 goStart = 0 # Contador de jugadores pidiendo partida
