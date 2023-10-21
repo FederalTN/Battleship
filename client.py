@@ -63,20 +63,29 @@ while(connected):
         # Si es tu turno puedes hacer acciones
         if(receivedJson["status"] == 1):
             if(receivedJson["action"] == "t"):
-                inputString = input("\nDONDE ATACAS? X Y: ")
+                while True:
+                    inputString = input("\nDONDE ATACAS? X Y: ")
 
-                # Avisar al servidor de que te desconectaras (En vez de atacar)
-                if(inputString == "D" or inputString == "d"):
-                    sendAction("d", 0, "", [])
-                    print("Esperando a que conecte otro jugador...")
-                    receivedJson = receiveRespond()
-                    onMatch = False
-                    # ALT: break # Permitira hacer otra partida
-                else:
-                    coordenadas = inputString.split()
-                    sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
-                    # Confirmacion de accion propia
-                    receivedJson = receiveRespond()
+                    # Avisar al servidor de que te desconectaras (En vez de atacar)
+                    if(inputString == "D" or inputString == "d"):
+                        sendAction("d", 0, "", [])
+                        print("Esperando a que conecte otro jugador...")
+                        receivedJson = receiveRespond()
+                        onMatch = False
+                        break
+                    else:
+                        try:
+                            coordenadas = inputString.split()
+                            coordenadas = [int(x) for x in coordenadas]
+                            if (validations.AttackCoordsValidation(coordenadas)):
+                                sendAction("a", "", "", [int(coordenadas[0]), int(coordenadas[1])])
+                                # Confirmacion de accion propia
+                                receivedJson = receiveRespond()
+                                break
+                            else:
+                                print("Coordenadas de ataque invalida")
+                        except Exception as e:
+                            print("ERROR, introduzca nuevamente un comando valido (ataque o disconnect)", e)
             
             elif(receivedJson["action"] == "b"):
                 while True:

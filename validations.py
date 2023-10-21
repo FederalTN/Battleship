@@ -33,3 +33,7 @@ def shipPosOutBoundsValidation(ships: dict, dimension: int = 20):
                 return True
     return False
 
+def AttackCoordsValidation(pos: list, dimension: int = 20):
+    if ((pos[0] < 1) or (pos[0] > dimension)) or ((pos[1] < 1) or (pos[1] > dimension)): return False
+    return True
+
