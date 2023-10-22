@@ -33,4 +33,4 @@ msgFromClient = {
 
 
 * si no responde el server en tantos segundos, reenviar
-
+* añadir un mapa del enemigo
