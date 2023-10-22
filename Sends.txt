@@ -32,3 +32,5 @@ msgFromClient = {
     }
 
 
+* si no responde el server en tantos segundos, reenviar
+

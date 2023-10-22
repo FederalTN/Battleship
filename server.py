@@ -3,6 +3,8 @@ import json
 import sys
 import BattleClasses
 import validations
+import threading
+import BOTclient
 
 localIP = "127.0.0.1"
 localPort = 20001
@@ -171,7 +173,7 @@ while(True):
         # Confirmacion de inicio de partida
         print("Un jugador dio la orden de empezar una partida")
 
-        # Partida PVP
+        # Partida PvP
         if (receivedJson["bot"] == 0):
             goStart += 1
             if (goStart > 1):
@@ -187,6 +189,44 @@ while(True):
                 for i in range(len(server.jugadoresConectados)):
                     server.jugadoresConectados[i].refrescarJugador()
                 goStart = 0
+        # Partida PvE (BOT)
+        else:
+            def serverPvE():
+                if(len(server.jugadoresConectados) < 2):
+                    message, address = receiveMessage(UDPServerSocket, bufferSize)
+                    receivedJson = json.loads(message.decode())
+
+                    server.conectarJugador(BattleClasses.Jugador("Client BOT", address))
+                    serverResponse(address, "", "c", 1, [])
+
+                serverResponseGlobal(server, "Se empezo la partida! espera tu turno!", clientMsg, 1, [])
+
+                print("JUGADORES PARTICIPANTES:")
+                server.printParticipants()
+
+                # while de partida en curso
+                battleMatch(server)
+
+            serverThread = threading.Thread(target=serverPvE)
+            serverThread.start()
+            botThread = threading.Thread(target=BOTclient.BOT)
+            botThread.start()
+
+            # Espera a que los hilos terminen
+            serverThread.join()
+            botThread.join()
+
+            
+            # Actualizacion cuando termine la partida
+            server.jugadoresConectados[1].refrescarJugador()
+            server.jugadoresConectados.pop(1)
+            server.jugadoresConectados[0].refrescarJugador()
+               
+
+            
+
+##########################################################
+            
     else:
         # Comando de cliente erroneo
         print("Denegacion de comando entrante")
