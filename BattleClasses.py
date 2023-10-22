@@ -1,5 +1,10 @@
 from typing import List, Tuple
-import socket
+import json
+
+# DIMENSIONES TABLERO
+with open('config.json', 'r') as archivo_config:
+    configuracion = json.load(archivo_config)
+dimension = configuracion["dimension"]
 
 class Coordenada:
     def __init__(self, x: int, y: int):
@@ -42,7 +47,7 @@ class Casilla:
         return False
 
 class Tablero:
-    def __init__(self, dimension: int = 20):
+    def __init__(self):
         self.casillas = [[Casilla() for _ in range(dimension)] for _ in range(dimension)]
 
     def colocarBarco(self, barco: Barco, coord: Coordenada, horizontal: bool):

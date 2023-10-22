@@ -1,5 +1,12 @@
+import json
+
+# DIMENSIONES TABLERO
+with open('config.json', 'r') as archivo_config:
+    configuracion = json.load(archivo_config)
+dimension = configuracion["dimension"]
+
 # VERIFICAR si dos barcos se sobrelapan
-def shipOverlapValidation(ships, index1: int, index2: int, dimension: int = 20):
+def shipOverlapValidation(ships, index1: int, index2: int):
     ship1 = list(ships.keys())[index1]
     ship2 = list(ships.keys())[index2]
 
@@ -27,14 +34,14 @@ def shipOverlapValidation(ships, index1: int, index2: int, dimension: int = 20):
 def shipOverlaps(ships):
     return shipOverlapValidation(ships, 0, 1) or shipOverlapValidation(ships, 0, 2) or shipOverlapValidation(ships, 1, 2)
 
-def shipPosOutBoundsValidation(ships: dict, dimension: int = 20):
+def shipPosOutBoundsValidation(ships: dict):
     for clave, valores in ships.items():
         for valor in valores:
             if (valor < 1) or (valor > dimension):
                 return True
     return False
 
-def AttackCoordsValidation(pos: list, dimension: int = 20):
+def AttackCoordsValidation(pos: list):
     if ((pos[0] < 1) or (pos[0] > dimension)) or ((pos[1] < 1) or (pos[1] > dimension)): return False
     return True
 

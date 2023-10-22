@@ -13,8 +13,8 @@ bufferSize = 1024
 # Create a UDP socket at client side
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-# DIMENSIONES TABLERO
-dimension = 20
+with open('config.json', 'r') as archivo_config:
+    configuracion = json.load(archivo_config)
 
 # Envio de mensajes
 def sendAction(body, type, fleet, pos: list):
@@ -37,7 +37,7 @@ def receiveRespond():
     #print(msg)
     return receivedJson
 # Genera una combinacion de barcos para el bot aleatoriamente
-def randomShips():
+def randomShips(dimension: int):
     # Definir los posibles valores para el tablero
     z_values = [0, 1]                       
     # Crear una lista de barcos
@@ -65,12 +65,11 @@ def randomAttack(posList):
     # Genera un índice aleatorio dentro del rango válido
     indice_aleatorio = random.randint(0, len(posList) - 1)
 
-    # Obtiene y muestra el elemento aleatorio
+    # Obtiene la posicion para atacar y la elimina de la lista de ataques posibles
     pos = posList.pop(indice_aleatorio)
-    print("Elemento aleatorio:", pos)
     return pos
 # Lista de reserva de posiciones posibles, utilizado para que el bot no repita ataques inutiles
-def initializePossibleAttackpos(dimension):
+def initializePossibleAttackpos(dimension: int):
     posList = []
     for y in range(1, dimension+1):
         for x in range(1, dimension+1):
@@ -79,6 +78,8 @@ def initializePossibleAttackpos(dimension):
 
 
 def BOT():
+    # DIMENSIONES TABLERO
+    dimension = configuracion["dimension"]
     posList = initializePossibleAttackpos(dimension)
     # accion para la conexion
     sendAction("c", "", "", "")
@@ -93,19 +94,17 @@ def BOT():
             onMatch = True
             while(onMatch):
                 # Recibir confirmacion de turnos
-                print("Recibiendo orden de turno...")
                 receivedJson = receiveRespond()
                 # Si es tu turno puedes hacer acciones
                 if(receivedJson["status"] == 1):
                     if(receivedJson["action"] == "t"):
-                        while True:
-                            coordenadas = randomAttack(posList)
-                            sendAction("a", "", "", [coordenadas[0], coordenadas[1]])
-                            # Confirmacion de accion propia
-                            receivedJson = receiveRespond()            
+                        coordenadas = randomAttack(posList)
+                        sendAction("a", "", "", [coordenadas[0], coordenadas[1]])
+                        # Confirmacion de accion propia
+                        receivedJson = receiveRespond()            
                     elif(receivedJson["action"] == "b"):
                         while True:
-                            ships = randomShips()
+                            ships = randomShips(dimension)
                             if (validations.shipOverlaps(ships) or validations.shipPosOutBoundsValidation(ships)): pass
                             else: break
                         sendAction("b", "", ships, [])
