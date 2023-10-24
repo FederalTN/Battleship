@@ -13,6 +13,11 @@ bufferSize = 1024
 # Create a UDP socket at client side
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
+# Compatibilidad para los otros clientes y servidores
+with open('config.json', 'r') as archivo_config:
+    configuracion = json.load(archivo_config)
+alt = configuracion["compatibilidad"]
+
 # Envio de mensajes
 def sendAction(body, type, fleet, pos: list):
     msgFromClient = {
@@ -78,7 +83,7 @@ while(connected):
                             coordenadas = inputString.split()
                             coordenadas = [int(x) for x in coordenadas]
                             if (validations.AttackCoordsValidation(coordenadas)):
-                                sendAction("a", "", "", [coordenadas[0], coordenadas[1]])
+                                sendAction("a", "", "", [coordenadas[0] -alt, coordenadas[1] -alt])
                                 # Confirmacion de accion propia
                                 receivedJson = receiveRespond()
                                 break
@@ -106,6 +111,8 @@ while(connected):
                     if (validations.shipOverlaps(ships) or validations.shipPosOutBoundsValidation(ships)):
                         print("Coordenadas erronea de barcos, introduce las coordenadas nuevamente.")
                     else:
+                        for key, value in ships.items():
+                            ships[key][:2] = [x - alt for x in value[:2]]
                         break
                 sendAction("b", "", ships, [])
                 # Confirmacion de construccion propia

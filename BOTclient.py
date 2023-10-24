@@ -80,6 +80,7 @@ def initializePossibleAttackpos(dimension: int):
 def BOT():
     # DIMENSIONES TABLERO
     dimension = configuracion["dimension"]
+    alt = configuracion["compatibilidad"]
     posList = initializePossibleAttackpos(dimension)
     # accion para la conexion
     sendAction("c", "", "", "")
@@ -99,14 +100,17 @@ def BOT():
                 if(receivedJson["status"] == 1):
                     if(receivedJson["action"] == "t"):
                         coordenadas = randomAttack(posList)
-                        sendAction("a", "", "", [coordenadas[0], coordenadas[1]])
+                        sendAction("a", "", "", [coordenadas[0] -alt, coordenadas[1] -alt])
                         # Confirmacion de accion propia
                         receivedJson = receiveRespond()            
                     elif(receivedJson["action"] == "b"):
                         while True:
                             ships = randomShips(dimension)
                             if (validations.shipOverlaps(ships) or validations.shipPosOutBoundsValidation(ships)): pass
-                            else: break
+                            else:
+                                for key, value in ships.items():
+                                    ships[key][:2] = [x - alt for x in value[:2]]
+                                break
                         sendAction("b", "", ships, [])
                         # Confirmacion de construccion propia
                         receivedJson = receiveRespond()

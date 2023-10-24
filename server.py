@@ -15,6 +15,9 @@ server = BattleClasses.Servidor()
 # Create a datagram socket
 UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
+with open('config.json', 'r') as archivo_config:
+    configuracion = json.load(archivo_config)
+
 # Bind to address and ip
 UDPServerSocket.bind((localIP, localPort))
 print("Esperando conexiones entrantes\n")
@@ -79,6 +82,7 @@ def battleMatch(server):
 
     DestroyedPlayer = False
     while(matchOngoing):
+        alt = configuracion["compatibilidad"]
         # Avisa y maneja los turnos
         print("Turno jugador: {}".format(turnCount))
         addressInTurn = server.jugadoresConectados[turnCount-1].address
