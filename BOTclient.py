@@ -23,6 +23,8 @@ def sendAction(body, type, fleet, pos: list):
         "bot": type, # 0 o 1, 1: partida vs bot, 0: partida vs otro cliente
         "ships": fleet, # cordenada (x,y) y orientación (0: vertical, 1: horizontal)
         "position": pos, # posicion de ataque
+        "reserva1": "",
+        "reserva2": ""
     }
     bytesToSend = json.dumps(msgFromClient).encode()
     # Send to server using created UDP socket
@@ -33,7 +35,7 @@ def receiveRespond():
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
     # Decodifica el mensaje JSON
     receivedJson = json.loads(msgFromServer[0].decode())
-    msg = "Message from Server: {}".format(receivedJson["response"])
+    msg = "Message from Server: {}".format(receivedJson["reserva1"])
     #print(msg)
     return receivedJson
 # Genera una combinacion de barcos para el bot aleatoriamente

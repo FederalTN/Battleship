@@ -25,10 +25,11 @@ print("Esperando conexiones entrantes\n")
 # Confirmacion del servidor de una accion del usuario
 def serverResponse(address, text, body, status, position):
     msgFromServer = {
-        "response": text, # Mensaje del servidor que se enviara ademas de la accion
         "action": body, # Accion recibida, confirmando
         "status": status,#, # [0: False, 1: True] si la accion del cliente es correcta o no
-        "position":  position # utlimas coordenadas jugadas x un usuario
+        "position":  position, # utlimas coordenadas jugadas x un usuario
+        "reserva1": text, # Mensaje del servidor que se enviara ademas de la accion
+        "reserva2": ""
     }
     bytesToSend = json.dumps(msgFromServer).encode()
     UDPServerSocket.sendto(bytesToSend, address)
