@@ -61,6 +61,7 @@ def receiveMessage(UDPServerSocket, bufferSize):
 
 # Se maneja la batalla de barcos
 def battleMatch(server):
+    alt = configuracion["compatibilidad"]
     matchOngoing = True
     turnCount = 1
 
@@ -68,21 +69,24 @@ def battleMatch(server):
         serverResponse(players.address, "CONSTRUYE TUS BARCOS\n", "b", 1, [])
         message, address = receiveMessage(UDPServerSocket, bufferSize)
         receivedJson = json.loads(message.decode())
+        playerFleet = receivedJson["ships"]
+        for key, value in playerFleet.items():
+            playerFleet[key][:2] = [x + alt for x in value[:2]]
+
         # VALIDA la construccion de los barcos
-        if (validations.shipOverlaps(receivedJson["ships"]) or validations.shipPosOutBoundsValidation(receivedJson["ships"])):
+        if (validations.shipOverlaps(playerFleet) or validations.shipPosOutBoundsValidation(playerFleet)):
             serverResponse(address, "ERROR", "d", 0, [])
             break
         else:
-            for battleship in receivedJson["ships"]:
-                shipData = [int(ship) for ship in receivedJson["ships"][battleship]]
+            for battleship in playerFleet:
+                shipData = [int(ship) for ship in playerFleet[battleship]]
                 horizontalidad = True if shipData[2] == 1 else False
                 players.tablero.colocarBarco(BattleClasses.Barco(battleship), BattleClasses.Coordenada(shipData[0], shipData[1]), horizontalidad)
             serverResponse(address, "Construido con exito", "b", 1, [])
             
 
     DestroyedPlayer = False
-    while(matchOngoing):
-        alt = configuracion["compatibilidad"]
+    while(matchOngoing):  
         # Avisa y maneja los turnos
         print("Turno jugador: {}".format(turnCount))
         addressInTurn = server.jugadoresConectados[turnCount-1].address
