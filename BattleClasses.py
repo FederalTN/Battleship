@@ -22,10 +22,7 @@ class Barco:
             self.blindaje -= 1
             if (self.blindaje == 0):
                print(self.tipo, "destruido!")
-               self.estado = "destruido"
-
-    def hundir(self):
-        self.estado = "hundido"
+               self.estado = "hundido"
 
 class Casilla:
     def __init__(self):
@@ -36,6 +33,7 @@ class Casilla:
         self.barco = barco
         self.estado = "ocupado"
 
+    #Solo en el servidor: actualiza los mapas de los jugadores si reciben un ataque
     def atacarCasilla(self):
         print(self.barco, self.estado)
         if (self.estado == "ocupado"):
@@ -45,6 +43,15 @@ class Casilla:
                 print("acerto!!\n")
                 return True
         return False
+    
+    #Solo en el cliente: actualiza el mapa si el ataque acerto a un enemigo
+    def atacarCasillaEnemigo(self, status: bool):
+        if status:
+            self.estado = "Acierto"
+            print("acertadoo")
+        else:
+            self.estado = "Pifia"
+            print("pifiadooo")
 
 class Tablero:
     def __init__(self):
@@ -63,8 +70,15 @@ class Tablero:
             else:
                 coord.y += 1
 
+    #Solo en el servidor: actualiza los mapas de los jugadores si reciben un ataque
     def realizarAtaque(self, coordenada: Coordenada):
         return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasilla()
+    
+    #Solo en el cliente: actualiza el mapa si el ataque acerto a un enemigo
+    def realizarAtaqueEnEnemigo(self, coordenada: Coordenada, status: bool):
+        return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasillaEnemigo(status)
+    
+    def ImprimirTablero
 
 class Jugador:
     def __init__(self, nombre: str, address):
@@ -97,29 +111,10 @@ class Servidor:
             print(players.nombre)
         print("")
 
-    def iniciarPartida(self):
-        # Implementar lógica para emparejar jugadores e iniciar una partida
-        pass
-
-    def finalizarPartida(self):
-        # Lógica para terminar una partida y anunciar el resultado
-        pass
-
 class Cliente:
-    def __init__(self, nombre: str, servidor: Servidor):
-        self.nombre = nombre
-        self.servidor = servidor
-        self.jugador = Jugador(nombre)
+    def __init__(self):
+        self.tableroEnemigo = Tablero()
 
-    def conectarAServidor(self):
-        self.servidor.conectarJugador(self.jugador)
-
-    def desconectar(self):
-        # Implementar lógica para desconexión
-        pass
-
-    def jugarTurno(self, coordenada: Coordenada):
-        resultado = self.jugador.recibirAtaque(coordenada)
-        # Enviar resultado al servidor y recibir actualizaciones
-        pass
-
+    def refrescarEnemigo(self):
+        self.tableroEnemigo = Tablero()
+    

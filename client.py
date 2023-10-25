@@ -42,7 +42,8 @@ def receiveRespond():
 # accion para la conexion
 sendAction("c", "", "", "")
 receivedJson = receiveRespond()
-
+# Mapa
+cliente = BattleClasses.Cliente()
 # Comprueba si se realiza una conexion
 connected = False
 if((receivedJson["action"],receivedJson["status"]) == ("c",1)): connected = True
@@ -77,6 +78,7 @@ while(connected):
                         print("Esperando a que conecte otro jugador...")
                         receivedJson = receiveRespond()
                         onMatch = False
+                        cliente.refrescarEnemigo()
                         break
                     else:
                         try:
@@ -86,6 +88,12 @@ while(connected):
                                 sendAction("a", "", "", [coordenadas[0] -alt, coordenadas[1] -alt])
                                 # Confirmacion de accion propia
                                 receivedJson = receiveRespond()
+                                if receivedJson["status"] == 1:
+                                    status = True
+                                else:
+                                    status = False
+                                coordenadas = BattleClasses.Coordenada(coordenadas[0], coordenadas[1])
+                                cliente.tableroEnemigo.realizarAtaqueEnEnemigo(coordenadas, status)
                                 break
                             else:
                                 print("Coordenadas de ataque invalida")
@@ -121,12 +129,12 @@ while(connected):
             elif(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
                 onMatch = False
-
+                cliente.refrescarEnemigo()
             # Verifica si perdiste por tener 0 vidas
             elif(receivedJson["action"] == "l"):
                 print("\nPERDISTE!!!!!!")
                 onMatch = False
-
+                cliente.refrescarEnemigo()
         # Si no es tu turno debes esperar a que lo sea
         else:
             # Esperar confirmacion de accion de otro jugador
@@ -135,4 +143,5 @@ while(connected):
             if(receivedJson["action"] == "w"):
                 print("\nGANASTE!!!!!!")
                 onMatch = False
+                cliente.refrescarEnemigo()
 
