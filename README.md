@@ -15,6 +15,7 @@ DEPENDIENDO SI SE QUIERE QUE EL BARCO SEA HORIZONTAL O VERTICAL
 SE ATACA COMO: 
 
 PosicionX PosicionY:
+
 X Y
 
 O ALTERNATIVAMENTE DESCONECTARSE ESCRIBIENDO "D" o "d" envez de un ataque lo que permitira hacer otra partida-
