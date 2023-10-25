@@ -32,7 +32,6 @@ class Casilla:
     def agregarBarco(self, barco: Barco):
         self.barco = barco
         self.estado = "ocupado"
-
     #Solo en el servidor: actualiza los mapas de los jugadores si reciben un ataque
     def atacarCasilla(self):
         print(self.barco, self.estado)
@@ -43,15 +42,25 @@ class Casilla:
                 print("acerto!!\n")
                 return True
         return False
-    
     #Solo en el cliente: actualiza el mapa si el ataque acerto a un enemigo
     def atacarCasillaEnemigo(self, status: bool):
         if status:
             self.estado = "Acierto"
             print("acertadoo")
         else:
-            self.estado = "Pifia"
-            print("pifiadooo")
+            if (self.estado != "Acierto"):
+                self.estado = "Pifia"
+                print("pifiadooo")
+    
+    def __str__(self):
+       # Devuelve una representación en forma de cadena del estado de la casilla
+        if self.estado == "vacío":
+            return "O"
+        elif self.estado == "Pifia":
+            return "X"
+        elif self.estado == "Acierto":
+            return "A"
+
 
 class Tablero:
     def __init__(self):
@@ -70,15 +79,20 @@ class Tablero:
             else:
                 coord.y += 1
 
-    #Solo en el servidor: actualiza los mapas de los jugadores si reciben un ataque
+    #Solo en el servidor: actualiza los mapas de los jugadores si reciben un ataque.
     def realizarAtaque(self, coordenada: Coordenada):
         return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasilla()
-    
-    #Solo en el cliente: actualiza el mapa si el ataque acerto a un enemigo
+    #Solo en el cliente: actualiza el mapa si el ataque acerto a un enemigo.
     def realizarAtaqueEnEnemigo(self, coordenada: Coordenada, status: bool):
         return self.casillas[coordenada.x-1][coordenada.y-1].atacarCasillaEnemigo(status)
-    
-    def ImprimirTablero
+    #Solo en el cliente: Implementa un mapa para ver la partida en curso.
+    def ImprimirTablero(self):
+        for i in range(dimension):
+            for j in range(dimension):
+                # Imprimir las casillas en orden inverso por la diagonal
+                casilla = self.casillas[j][i]
+                print(casilla, end=' ')
+            print()
 
 class Jugador:
     def __init__(self, nombre: str, address):

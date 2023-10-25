@@ -94,6 +94,8 @@ while(connected):
                                     status = False
                                 coordenadas = BattleClasses.Coordenada(coordenadas[0], coordenadas[1])
                                 cliente.tableroEnemigo.realizarAtaqueEnEnemigo(coordenadas, status)
+
+                                cliente.tableroEnemigo.ImprimirTablero()
                                 break
                             else:
                                 print("Coordenadas de ataque invalida")
